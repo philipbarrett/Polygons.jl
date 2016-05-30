@@ -25,7 +25,9 @@ export
 ## Source files
 include("common.jl")
 include("simple.jl")
+include("convex.jl")
 include("utils.jl")
+include("hausdorff.jl")
 include("polyPlot.jl")
 
 end # module

@@ -64,7 +64,7 @@ function grahamScan( pts::Matrix )
     out[ M, : ] = orderpts[ i, : ]
         # Add to the output if we have an acw angle
   end
-  return out[ 1:M, : ]
+  return Polygon( pts=out[ 1:M, : ] )
 end
 
 function grahamScan( poly::Polygon )

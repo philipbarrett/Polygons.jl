@@ -37,102 +37,71 @@ The Polygon should already be oreinted counterclockwise
 function crop( poly::Polygon, dim::Int, dist, upper=true )
   N = size(poly.pts)[1]
 
-  # Compute the direction of the chop
+  # The crop doesn't bind
+  l = minimum( poly.pts[:,dim] )
+  u = maximum( poly.pts[:,dim] )
+  if( upper )
+      if( dist < l )
+          return poly
+      end
+      if( dist > u )
+          return Polygon()
+      end
+  else
+      if( dist < l )
+          return Polygon()
+      end
+      if( dist > u )
+          return poly
+      end
+  end
+
+  # Compute the direction of the crop
   if( dim == 1 && upper )
-    dir = [ -1, 0 ]
+    dir = [ -1.0, 0.0 ]
     dist = - dist
   elseif( dim == 1 && !upper )
-    dir = [ 1, 0 ]
+    dir = [ 1.0, 0.0 ]
   elseif( dim==2 && upper )
-    dir = [ 0, -1 ]
+    dir = [ 0.0, -1.0 ]
     dist = - dist
   else
-    dir = [ 0, 1 ]
+    dir = [ 0.0, 1.0 ]
   end
   c = dir[1]
   s = dir[2]
       # Sign and cosine of the dir vector
 
-  # The chop doesn't bind
-  l = minimum( poly.pts[:,dim] )
-  u = maximum( poly.pts[:,dim] )
-  if( sum( dist * dir ) < l || sum( dist * dir ) > u )
-    return(poly)
-  end
-  if( sum( dist * dir ) < u || sum( dist * dir ) > l )
-    return(Polygon())
+  # Find the points which are to be cropped
+  init = 0      # Last point to be retained
+  term = 0      # Last point to be cropped
+      # Initial and terminal cropping points
+  for( i in 1:N )
+      if( ( poly.pts[i,:] * dir )[1] < dist )
+          if( 0 < init < i-1 && term > 0 )
+              break
+          end
+          init = ( init == 0 ) ? term + 1 : init + 1
+      else
+          if( 0 < term < i-1 && init > 0 )
+              break
+          end
+          term = ( term == 0 ) ? init + 1 : term + 1
+            # Increment the terminal counter if non-zero
+
+      end
   end
 
-  # Find the points which are to be chopped
-  # init = 1, term = 1
-  #     # Initial and terminal chopping points
-  # for( i in 1:N )
-  #   if(  )
-  # end
+  if( init < term )
+    newdirs = [ poly.dirs[ 1:init, : ] ;
+                dir' ; poly.dirs[ term:end, : ] ]
+    newdists = [ poly.dists[ 1:init ]; dist;
+                poly.dists[ term:end ] ]
+  else
+    newdirs = [ dir' ; poly.dirs[ term:init, : ] ]
+    newdists = [ dist; poly.dists[ term:init ] ]
+  end
 
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#   # Now loop over the direction vectors
-#   i = 1
-#       # Counter
-#   c1 = poly.dirs[1,1] / norm( poly.dirs[1,:] )
-#   s1 = poly.dirs[1,2] / norm( poly.dirs[1,:] )
-#       # Initiate the next point's sign and cos
-#   while( i<(N-1) )
-#     c0 = c1
-#     s0 = c1
-#         # Old is now new. How sad, how true.
-#     c1 = poly.dirs[i+1,1] / norm( poly.dirs[i+1,:] )
-#     s1 = poly.dirs[i+1,2] / norm( poly.dirs[i+1,:] )
-#         # Cosine and sine of the next direction vector
-#     if( min( s1, s0 ) > 0  )
-#       if( c0 >= c > c1 )
-#         break
-#       end
-#     elseif( max( s1, s0 ) < 0 )
-#       if( c0 <= c < c1 )
-#         break
-#       end
-#     elseif( s0 > 0 > s1 )
-#       if( c <= min( c0, c1 ) )
-#         break
-#       end
-#     else
-#       if( c >= max( c0, c1 ))
-#         break
-#       end
-#     end
-#     i += 1
-#   end
-#       # So dir fits in between the ith and (i+1)th direction vectors
-#   newdirs = [ poly.dirs[1:i, :] ; dir' ; poly.dirs[ (i+1):end, : ] ]
-#   newdists = [ poly.dists[1:i] ; dist ; poly.dists[ (i+1):end ] ]
-#       # Create the new directions and distances
-#
-#   ## Special cases for exact dir in poly.dirs ##
-#   if( poly.dirs[i,:] == dir)
-#     newdirs = poly.dirs
-#     newdists = [ poly.dists[1:(i-1)] ; dist ; poly.dists[ (i+1):end ] ]
-#   end
-#   if( poly.dirs[i+1,:] == dir)
-#     newdirs = poly.dirs
-#     newdists = [ poly.dists[1:i] ; dist ; poly.dists[ (i+2):end ] ]
-#   end
-#
-# println( "i=", i )
-# println( "newdirs\n", newdirs )
-# println( "newdists\n", newdists )
-#
-#   return( Polygon( dirs = newdirs, dists = newdists ) )
+  return Polygon( dirs = newdirs, dists = newdists )
 
 end
