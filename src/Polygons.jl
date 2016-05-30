@@ -5,11 +5,11 @@ using Colors
 import Base: *
 
 export
-
     # Types
-    Polygon
+    Polygon,
 
     # Methods
+    acwOrder!,
     ptsToDirs,
     dirsToPts,
     add,

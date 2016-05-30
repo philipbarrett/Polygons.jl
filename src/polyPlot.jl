@@ -2,7 +2,7 @@
 Philip Barrett, pobarrett@gmail.com
 27may2016, Chicago
 
-Provides plotting functionality for the polygon class
+Provides plotting functionality for the Polygon class
 =#
 
 function polyPlot( pts::Matrix )
@@ -11,11 +11,11 @@ function polyPlot( pts::Matrix )
   polyPlot( x=P[:,1], y=P[:,2], Geom.path )
 end
 
-function polyPlot( poly::polygon )
+function polyPlot( poly::Polygon )
   polyPlot( poly.pts )
 end
 
-function polyPlot( polys::Array{polygon,1} )
+function polyPlot( polys::Array{Polygon,1} )
   polyPlot( [ layer( x=[ polys[i].pts[:,1] ; polys[i].pts[1,1] ],
                  y=[ polys[i].pts[:,2] ; polys[i].pts[1,2] ],
              Geom.path,

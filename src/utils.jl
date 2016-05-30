@@ -2,7 +2,7 @@
 Philip Barrett, pobarrett@gmail.com
 27may2016, Chicago
 
-Defines utilities for polygon objects
+Defines utilities for Polygon objects
 =#
 
 """
@@ -19,22 +19,22 @@ function deeDoop( pts::Matrix, tol=1e-10 )
   return pts[ diff .> tol, : ]
 end
 
-function deeDoop( poly::polygon, tol=1e-10 )
+function deeDoop( poly::Polygon, tol=1e-10 )
   return deeDoop( poly.pts )
 end
 
 """
-    crop( poly::polygon, dim::Int, dist, upper=true )
-Returns a polygon cropped in either the x or y dimension, with upper = true
-retaining the part of the polygon above the chop, and if false the part below.
-The polygon should already be oreinted counterclockwise
+    crop( poly::Polygon, dim::Int, dist, upper=true )
+Returns a Polygon cropped in either the x or y dimension, with upper = true
+retaining the part of the Polygon above the chop, and if false the part below.
+The Polygon should already be oreinted counterclockwise
 """
 ## TODO: DEBUG ME!
 ## Strategy here is all wrong.  Better: Identify all the points that are to the
 ## left (right) of the slice.  Then throw away them (and their associated
 ## normals).  Finally, reintroduce the slice boundary into the dirs/dist
 ## framework
-function crop( poly::polygon, dim::Int, dist, upper=true )
+function crop( poly::Polygon, dim::Int, dist, upper=true )
   N = size(poly.pts)[1]
 
   # Compute the direction of the chop
@@ -60,7 +60,7 @@ function crop( poly::polygon, dim::Int, dist, upper=true )
     return(poly)
   end
   if( sum( dist * dir ) < u || sum( dist * dir ) > l )
-    return(polygon())
+    return(Polygon())
   end
 
   # Find the points which are to be chopped
@@ -133,6 +133,6 @@ function crop( poly::polygon, dim::Int, dist, upper=true )
 # println( "newdirs\n", newdirs )
 # println( "newdists\n", newdists )
 #
-#   return( polygon( dirs = newdirs, dists = newdists ) )
+#   return( Polygon( dirs = newdirs, dists = newdists ) )
 
 end

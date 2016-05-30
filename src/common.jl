@@ -17,17 +17,45 @@ type Polygon
 end
 
 """
+    acwOrder!( ptsDirs::Matrix, dists::Vector=[NaN] )
+Orients either a set of points, or a a directions/distance pair anit-clockwise.
+"""
+function acwOrder( ptsDirs::Matrix, dists::Vector=[NaN] )
+    N = size(ptsDirs)[1]
+        # Number of poits/directions
+    cah = zeros( N )
+        # Initialize the cosine function
+    cah = [ ptsDirs[i,1] / norm( ptsDirs[i,:] ) for i in 1:N ]
+        # The cosine
+    ord = [ ( ( ptsDirs[i,2] >= 0 ) ? cah[i] : - 2 - cah[i] ) for i in 1:N ]
+        # Order based on a decreasing transform of the cosine
+    ord_idx = sortperm(ord, rev=true)
+        # The sorting vector
+    ptsDirsOut::Matrix{Float64} = ptsDirs[ ord_idx, : ]
+        # Reorder the opints
+
+    if( isnan(dists[1]) )
+        return ptsDirsOut
+    else
+        distsOut::Vector{Float64} = dists[ord_idx]
+        return ptsDirsOut, distsOut
+    end
+end
+
+
+"""
     polygon( ; pts=[ NaN NaN ], dirs=[ NaN NaN ], dists=[NaN]  )
 Constructor for poylgon.  Maitained assumptions are that dirs is ordered
 clockwise and that pts is already a convex hull.
 """
 function Polygon( ; pts=[ NaN NaN ], dirs=[ NaN NaN ], dists=[NaN]  )
 
-    # TODO: Check for oreintation of the points and normals (each a separate function)
-
     if( !isnan( pts[1] ) && isnan( dirs[1] ) )
+        pts = acwOrder( pts )
+        pts = [ pts[ end, : ]; pts[ 1:(end-1), : ] ]
         dirs, dists = ptsToDirs( pts )
     elseif( !isnan( dirs[1] ) && isnan( pts[1] ) )
+        dirs, dists = acwOrder( dirs, dists )
         pts = dirsToPts( dirs, dists )
     end
     return Polygon( pts, dirs, dists )
@@ -37,11 +65,9 @@ end
     dirsToPts( dirs::Matrix, dists::Vector )
 Given a normal/distance description of a set, returns a set of points mZ which
 lie at the vertices.  This assumes that the vector of normals is ordered
-clockwise already.
+counter-clockwise already.
 """
-# TODO: Check that this works for anti-clockwise orientation
-
-function dirsToPts( dirs::Matrix{Float64}, dists::Vector{Float64} )
+function dirsToPts( dirs::Matrix, dists::Vector )
   nPts = length(dists)
       # Number of points to be computed
   pts = zeros(Float64, 2, nPts)
@@ -75,7 +101,8 @@ function dirsToPts( dirs::Matrix{Float64}, dists::Vector{Float64} )
       counter += 1
     end
   end
-  return( transpose(pts) )
+  out = transpose(pts)
+  return( [ out[ nPts, : ] ; out[ 1:(nPts-1), : ] ] )
 end
 
 """
@@ -83,19 +110,16 @@ end
 Given a set of points, returns the normal-distance representation of the edges
 Assumes that the points are ordered anti-clockwise already.
 """
-# TODO: Make sure that this works for anti-clockwise orderd points
-
-function ptsToDirs( pts::Matrix{Float64} )
-
+function ptsToDirs( pts::Matrix )
   nPts = size(pts)[1]
       # Number of points
   flip = [ 0 1; -1 0 ]
       # Matrix to convert grdient to normal
   neighbors = [ pts[ 2:nPts, : ] ; pts[1,:] ]
       # The neighboring points
-  unscaled = ( neighbors - pts ) * flip
+  unscaled = ( pts - neighbors ) * flip
       # The unscaled vaules
-  dirs::Matrix{Float64} = unscaled ./ sqrt( sum( neighbors .* neighbors, 2 ) )
+  dirs::Matrix{Float64} = unscaled ./ sqrt( sum( unscaled .* unscaled, 2 ) )
       # The directions
   dists::Vector{Float64} = vec(sum( pts .* dirs, 2))
       # The distances in each direction
