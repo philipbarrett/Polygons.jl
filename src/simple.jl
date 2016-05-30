@@ -4,16 +4,16 @@ Philip Barrett, pobarrett@gmail.com
 
 Defines basic Polygon operations:
     * Vector Addition
-    * Setsum (of both Polygon pairs and arrays)
+    * SetsetSum (of both Polygon pairs and arrays)
     * Scalar multiplication
-    * Weighted sum
+    * Weighted setSum
 =#
 
 """
     add( poly::Polygon, pt::Vector )
 Adds a vector to all points in a Polygon
 """
-function add( poly::Polygon, u::Vector )
+function (+)( poly::Polygon, u::Vector )
 
   pts = similar( poly.pts )
   pts[:,1] = poly.pts[:,1] + u[1]
@@ -23,10 +23,10 @@ function add( poly::Polygon, u::Vector )
 end
 
 """
-    add( poly1::Polygon, poly2::Polygon, dirs, outer=true )
+    setSum( poly1::Polygon, poly2::Polygon, dirs, outer=true )
 Addition functionality.  Provides either an inner or out approximation
 """
-function add( poly1::Polygon, poly2::Polygon, dirs, outer=true )
+function setSum( poly1::Polygon, poly2::Polygon, dirs, outer=true )
   dists1 = maximum( poly1.pts * dirs', 1 )
   dists2 = maximum( poly2.pts * dirs', 1 )
       # The distances in each direction
@@ -39,10 +39,10 @@ function add( poly1::Polygon, poly2::Polygon, dirs, outer=true )
 end
 
 """
-    add( poly1::Array{Polygon,1}, poly2::Array{Polygon,1}, dirs, outer=true )
+    setSum( poly1::Array{Polygon,1}, poly2::Array{Polygon,1}, dirs, outer=true )
 Adds an array of Polygons
 """
-function add( polys::Array{Polygon,1}, dirs, outer=true )
+function setSum( polys::Array{Polygon,1}, dirs, outer=true )
 
   N = length(polys)
       # Number of Polygons to add
@@ -69,7 +69,7 @@ end
 
 """
     weightedSum( polys::Array{Polygon,1}, wts::Vector dirs, outer=true )
-Computes a weighted sum of Polygons
+Computes a weighted setSum of Polygons
 """
 function wtdSum( polys::Array{Polygon,1}, wts::Vector, dirs, outer=true )
   N = length( polys )
@@ -79,5 +79,5 @@ function wtdSum( polys::Array{Polygon,1}, wts::Vector, dirs, outer=true )
   for( i in 1:N )
     polys2[i] = wts[i] * polys[i]
   end
-  return( add( polys2, dirs, outer ) )
+  return( setSum( polys2, dirs, outer ) )
 end

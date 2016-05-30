@@ -2,7 +2,7 @@ module Polygons
 
 using Gadfly
 using Colors
-import Base: *
+import Base: *, +
 
 export
     # Types
@@ -12,8 +12,9 @@ export
     acwOrder!,
     ptsToDirs,
     dirsToPts,
-    add,
     (*),
+    (+),
+    sum,
     weightedSum,
     gScan,
     crop,

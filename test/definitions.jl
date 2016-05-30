@@ -12,5 +12,11 @@ a = Polygon( Z, G, m ) ;
 b = Polygon( pts=Z ) ;
 c = Polygon( dirs=G, dists=m ) ;
 
-@test a == b
-@test a == c
+badZ = Z[ [1, 3, 4, 2], : ]
+d = Polygon(pts=badZ)
+
+for( compare in [b c d] )
+    @test a.pts == compare.pts
+    @test a.dirs == compare.dirs
+    @test a.dists == compare.dists
+end

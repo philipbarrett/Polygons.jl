@@ -8,7 +8,7 @@ Provides plotting functionality for the Polygon class
 function polyPlot( pts::Matrix )
   P = [ pts ; pts[1,:] ]
       # Wrap the matrix of points
-  polyPlot( x=P[:,1], y=P[:,2], Geom.path )
+  plot( x=P[:,1], y=P[:,2], Geom.path )
 end
 
 function polyPlot( poly::Polygon )
