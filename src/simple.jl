@@ -27,15 +27,27 @@ end
 Addition functionality.  Provides either an inner or out approximation
 """
 function setSum( poly1::Polygon, poly2::Polygon, dirs, outer=true )
-  dists1 = maximum( poly1.pts * dirs', 1 )
-  dists2 = maximum( poly2.pts * dirs', 1 )
+  dists1 = poly1.pts * dirs'
+  dists2 = poly2.pts * dirs'
       # The distances in each direction
-  dists = vec( dists1 + dists2 )
+  maxdists1 = maximum( dists1, 1 )
+  maxdists2 = maximum( dists2, 1 )
+      # The maximum distances
+  maxdists = vec( maxdists1 + maxdists2 )
 
   if( outer )
-    return Polygon( dirs=dirs, dists=dists )
+    return Polygon( dirs=dirs, dists=maxdists )
   end
-  return Polygon( pts=dirsToPts( dirs, dists ) )
+
+  Z1 = zeros( dirs )
+  Z2 = zeros( dirs )
+        # Initiate output points
+
+  for( i in 1:size(dirs)[1])
+      Z1[i,:] = poly1.pts[ dists1[:,i] .== maxdists1[i], : ][1,:]
+      Z2[i,:] = poly2.pts[ dists2[:,i] .== maxdists2[i], : ][1,:]
+  end
+  return Polygon( pts = deeDoop( Z1 + Z2 ) )
 end
 
 """

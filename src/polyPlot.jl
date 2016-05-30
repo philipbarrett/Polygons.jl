@@ -16,7 +16,7 @@ function polyPlot( poly::Polygon )
 end
 
 function polyPlot( polys::Array{Polygon,1} )
-  polyPlot( [ layer( x=[ polys[i].pts[:,1] ; polys[i].pts[1,1] ],
+  plot( [ layer( x=[ polys[i].pts[:,1] ; polys[i].pts[1,1] ],
                  y=[ polys[i].pts[:,2] ; polys[i].pts[1,2] ],
              Geom.path,
              Theme(default_color=distinguishable_colors(length(polys))[i]))

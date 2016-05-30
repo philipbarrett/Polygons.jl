@@ -6,3 +6,7 @@ m = [ 1, 1, 1, 1 ]
 a = Polygon( Z, G, m ) ;
 b = Polygon( pts=Z ) ;
 c = Polygon( dirs=G, dists=m ) ;
+
+f = a + [1, 1]
+
+polyPlot( [a, f] )

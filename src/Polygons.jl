@@ -14,9 +14,9 @@ export
     dirsToPts,
     (*),
     (+),
-    sum,
+    setSum,
     weightedSum,
-    gScan,
+    grahamScan,
     crop,
     polyPlot
 

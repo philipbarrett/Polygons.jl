@@ -14,11 +14,11 @@ function acw( p1, p2, p3 )
 end
 
 """
-    gScan( pts::Matrix )
+    grahamScan( pts::Matrix )
 Computes a convex hull using the Graham Scan algortithm
 """
 
-function gScan( pts::Matrix )
+function grahamScan( pts::Matrix )
 
   N = size(pts)[1]
       # Number of points
@@ -65,4 +65,8 @@ function gScan( pts::Matrix )
         # Add to the output if we have an acw angle
   end
   return out[ 1:M, : ]
+end
+
+function grahamScan( poly::Polygon )
+    return grahamScan( poly.pts )
 end
