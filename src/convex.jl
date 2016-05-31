@@ -15,7 +15,7 @@ end
 
 """
     grahamScan( pts::Matrix )
-Computes a convex hull using the Graham Scan algortithm
+Computes a convex hull using the Graham Scan algortithm NB: Returns a polygon object even when a matrix is submitted
 """
 
 function grahamScan( pts::Matrix )
@@ -50,7 +50,7 @@ function grahamScan( pts::Matrix )
   M = 2
       # Counts number of rows in convex hull
   for( i in 3:N )
-    while( acw( out[ M-1, : ], out[ M, : ], orderpts[ i, : ] ) <= 0 )
+    while( acw( out[ M-1, : ], out[ M, : ], orderpts[ i, : ] ) < 0 )
       if( M > 2 )
         M -= 1
       elseif( i == N )

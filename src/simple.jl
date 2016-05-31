@@ -70,7 +70,7 @@ function setSum( polys::Array{Polygon,1}, dirs::Matrix, outer=true )
         # Sum the distances
     if( !outer )
       for( j in 1:size(dirs)[1])
-        innerpts[j,:] += polys[i].pt[ thisdists[:,j] .== maxdists[j], : ][1,:]
+        innerpts[j,:] += polys[i].pts[ thisdists[:,j] .== maxdists[j], : ][1,:]
       end
     end
   end

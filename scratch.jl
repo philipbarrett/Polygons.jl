@@ -26,14 +26,51 @@ function T_unc( W::Array{ Polygon, 1 }, s::Float64, a::Vector, outer = true)
     return ( ( 1 - bet ) * u ) + ( bet * ( weightedSum( W, vec( P[ s_idx, :] ), dirs, outer ) ) )
 end
 
-winit1 = grahamScan( [ 2 2; -1 3.5; -3.5 1; -0.5 0.5 ; 0.5 -0.5 ] )
-winit = [ winit1, winit1 ]
-tt = weightedSum( winit, vec( P[ 1, :] ), dirs )
-ff = T_unc( winit, .5, [1, 1] )
+function T_a( W::Array{ Polygon, 1 }, s::Float64, a::Vector, outer = true)
+    # calcultes the incentive-compatible value set conditional on the action a
+    unc = T_unc( W, s, a, outer )
+        # The unconstrained set
+    pddev = [ maximum( U1(s)[ :, a[2] ] ), maximum( U2(s)[ a[1], : ] ) ]
+        # The deviating period payoffs
+    s_idx = ( s == .5 ) ? 1 : 2
+        # The index of s.  Required for selecting the right transition probability row
+    dev = ( 1 - bet ) * pddev + bet * vlow[ s_idx, : ]'
+        # The deviating payoff
+    ic = crop( crop( unc, 1, dev[1] ), 2, dev[2] )
+        # The incentive compatible set of payoffs\
+    return ic
+end
 
-uu = bet * tt
-s = .5
-a = [1 1 ]
-gg = (1-bet ) * vec( [ U1(s)[a[1],a[2]] ; U2(s)[a[1],a[2]] ] )
-ii = gg + uu
-polyPlot([ff, ii, winit1])
+A_idx = [ 1 1; 1 2 ; 2 1; 2 2 ]
+    # The matrix of action combinations
+
+function T_operator( W::Array{ Polygon, 1 }, states::Vector, outer = true)
+    # Forms the T operator
+    out = [ union( [ T_a( W, s, vec(A_idx[j,:]))::Polygon for j in 1:size(A_idx)[1] ] )::Polygon for s in states ]
+    return out
+end
+
+# polyPlot( [ winit1, T_operator( winit, [ .5 , -.5 ] ) ] )
+
+winit1 = grahamScan( [ 2 2; -1 3.5; 3.5 -1; -0.5 0.5 ; 0.5 -0.5 ] )
+winit = [ winit1, winit1 ]
+aa = [ T_a( winit, -.5, vec(A_idx[j,:]))::Polygon for j in 1:size(A_idx)[1] ]
+ff = union( aa )
+polyPlot( [ aa, ff ])
+polyPlot( aa[2] )
+
+s = -.5
+a = vec(A_idx[2,:])
+nn=T_a( winit, s, a)::Polygon
+unc = T_unc( winit, s, a)
+unc2 = grahamScan(unc)
+pddev = [ maximum( U1(s)[ :, a[2] ] ), maximum( U2(s)[ a[1], : ] ) ]
+    # The deviating period payoffs
+s_idx = ( s == .5 ) ? 1 : 2
+    # The index of s.  Required for selecting the right transition probability row
+dev = ( 1 - bet ) * pddev + bet * vlow[ s_idx, : ]'
+    # The deviating payoff
+ic = crop( crop( unc, 1, dev[1] ), 2, dev[2] )
+
+
+polyPlot([unc, nn])

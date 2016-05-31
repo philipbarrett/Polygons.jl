@@ -5,17 +5,34 @@ Philip Barrett, pobarrett@gmail.com
 Defines utilities for Polygon objects
 =#
 
+
+"""
+    union( poly1::Polygon, poly2::Polygon )
+Returns the convex union of two polygons
+"""
+function union( poly1::Polygon, poly2::Polygon )
+    pts = [ poly1.pts ; poly2.pts ]
+        # The matrix of points to work with
+    return grahamScan( pts )
+end
+
+"""
+    union( polys::Array{ Polygon, 1 } )
+Returns the convex union of an array of polygons
+"""
+function union( polys::Array{ Polygon, 1 } )
+    pts = vcat( [ polys[i].pts for i in 1:length(polys) ] ... )
+        # The matrix of all points
+    return grahamScan( pts )
+end
+
+
 """
     crop( poly::Polygon, dim::Int, dist, upper=true )
 Returns a Polygon cropped in either the x or y dimension, with upper = true
 retaining the part of the Polygon above the chop, and if false the part below.
 The Polygon should already be oreinted counterclockwise
 """
-## TODO: DEBUG ME!
-## Strategy here is all wrong.  Better: Identify all the points that are to the
-## left (right) of the slice.  Then throw away them (and their associated
-## normals).  Finally, reintroduce the slice boundary into the dirs/dist
-## framework
 function crop( poly::Polygon, dim::Int, dist, upper=true )
   N = size(poly.pts)[1]
 

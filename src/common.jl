@@ -25,9 +25,16 @@ function acwOrder( ptsDirs::Matrix, dists::Vector=[NaN] )
         # Number of poits/directions
     cah = zeros( N )
         # Initialize the cosine function
-    cah = [ ptsDirs[i,1] / norm( ptsDirs[i,:] ) for i in 1:N ]
+    if( isnan( dists[1] ) )
+        centered = ptsDirs - ones(size(ptsDirs)[1]) * mean( ptsDirs, 1 )
+            # Relative to centre if doing points
+            # Enhances numerical stability of orientation
+    else
+        centered = ptsDirs
+    end
+    cah = [ centered[i,1] / norm( centered[i,:] ) for i in 1:N ]
         # The cosine
-    ord = [ ( ( ptsDirs[i,2] >= 0 ) ? cah[i] : - 2 - cah[i] ) for i in 1:N ]
+    ord = [ ( ( centered[i,2] >= 0 ) ? cah[i] : - 2 - cah[i] ) for i in 1:N ]
         # Order based on a decreasing transform of the cosine
     ord_idx = sortperm(ord, rev=true)
         # The sorting vector

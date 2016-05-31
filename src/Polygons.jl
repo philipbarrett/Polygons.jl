@@ -2,7 +2,7 @@ module Polygons
 
 using Gadfly
 using Colors
-import Base: *, +
+import Base: *, +, union
 
 export
     # Types
