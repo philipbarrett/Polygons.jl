@@ -22,6 +22,10 @@ function (+)( poly::Polygon, u::Vector )
   return Polygon( pts = pts )
 end
 
+function (+)( u::Vector, poly::Polygon )
+  return poly + u
+end
+
 """
     setSum( poly1::Polygon, poly2::Polygon, dirs, outer=true )
 Addition functionality.  Provides either an inner or out approximation
@@ -36,7 +40,8 @@ function setSum( poly1::Polygon, poly2::Polygon, dirs, outer=true )
   maxdists = vec( maxdists1 + maxdists2 )
 
   if( outer )
-    return Polygon( dirs=dirs, dists=maxdists )
+    out1 = Polygon( dirs=dirs, dists=maxdists )
+    return Polygon( deeDoop( out1.pts ) )
   end
 
   Z1 = zeros( dirs )
@@ -54,7 +59,7 @@ end
     setSum( poly1::Array{Polygon,1}, poly2::Array{Polygon,1}, dirs, outer=true )
 Adds an array of Polygons
 """
-function setSum( polys::Array{Polygon,1}, dirs, outer=true )
+function setSum( polys::Array{Polygon,1}, dirs::Matrix, outer=true )
 
   N = length(polys)
       # Number of Polygons to add
@@ -83,7 +88,7 @@ end
     weightedSum( polys::Array{Polygon,1}, wts::Vector dirs, outer=true )
 Computes a weighted setSum of Polygons
 """
-function wtdSum( polys::Array{Polygon,1}, wts::Vector, dirs, outer=true )
+function weightedSum( polys::Array{Polygon,1}, wts::Vector, dirs::Matrix, outer=true )
   N = length( polys )
       # Number of Polygons
   polys2 = polys
