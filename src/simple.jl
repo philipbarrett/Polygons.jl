@@ -96,7 +96,7 @@ Computes a weighted setSum of Polygons
 function weightedSum( polys::Array{Polygon,1}, wts::Vector, dirs::Matrix, outer=true )
   N = length( polys )
       # Number of Polygons
-  polys2 = polys
+  polys2 = similar(polys)
       # Initiate scaled Polygons with input array
   for( i in 1:N )
     polys2[i] = wts[i] * polys[i]

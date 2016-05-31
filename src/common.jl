@@ -67,7 +67,7 @@ function deeDoop( dirs::Matrix, dists::Vector, tol=1e-10 )
 end
 
 function deeDoop( poly::Polygon, tol=1e-10 )
-  return deeDoop( poly.pts )
+  return Polygon( pts=deeDoop( poly.pts ) )
 end
 
 
