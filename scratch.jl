@@ -19,14 +19,21 @@ U2(s) = [ 2 3-s; -1 -s ]
 
 function T_unc( W::Array{ Polygon, 1 }, s, a, outer = true)
     # s is the value for the state and a is a vector containing the action indices
-    u = vec( [ U1(s)[a] ; U2(s)[a] ] )
+    u = vec( [ U1(s)[a[1],a[2]] ; U2(s)[a[1],a[2]] ] )
         # Period payoff
     s_idx = ( s == .5 ) ? 1 : 2
         # The index of s.  Required for selecting the right transition probability row
-    return ( 1 - bet ) * u + bet * weightedSum( W, vec( P[ s_idx, :] ), dirs, outer )
+# println( "s_idx = " s_idx )
+# println( "u = " u )
+    return ( ( 1 - bet ) * u ) + ( bet * weightedSum( W, vec( P[ s_idx, :] ), dirs, outer ) )
 end
 
 winit1 = Polygon( pts = [ 2 2; -1 3.5; -3.5 1; -0.5 0.5 ; 0.5 -0.5 ] )
 winit = [ winit1, winit1 ]
 ff = T_unc( winit, .5, [1 1] )
 tt = weightedSum( winit, vec( P[ 1, :] ), dirs )
+uu = bet * tt
+s = .5
+a = [1 1 ]
+gg = (1-bet ) * vec( [ U1(s)[a[1],a[2]] ; U2(s)[a[1],a[2]] ] )
+ii = gg + uu

@@ -18,7 +18,8 @@ export
     weightedSum,
     grahamScan,
     crop,
-    polyPlot
+    polyPlot,
+    deeDoop
 
 # TODO: Hausdorff distance
 

@@ -16,9 +16,11 @@ function polyPlot( poly::Polygon )
 end
 
 function polyPlot( polys::Array{Polygon,1} )
+  color_vec = ["red" "blue" "black" "green" "cyan" "orange" "magenta" ]
+  # Theme(default_color=)?
   plot( [ layer( x=[ polys[i].pts[:,1] ; polys[i].pts[1,1] ],
                  y=[ polys[i].pts[:,2] ; polys[i].pts[1,2] ],
              Geom.path,
-             Theme(default_color=distinguishable_colors(length(polys))[i]))
-             for i in 1:length(polys), line_width=4]...)
+             Theme(default_color=color(parse(Colorant, color_vec[i%7]))) )
+             for i in 1:length(polys), line_width=8]...)
 end

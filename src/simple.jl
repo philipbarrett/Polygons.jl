@@ -14,12 +14,7 @@ Defines basic Polygon operations:
 Adds a vector to all points in a Polygon
 """
 function (+)( poly::Polygon, u::Vector )
-
-  pts = similar( poly.pts )
-  pts[:,1] = poly.pts[:,1] + u[1]
-  pts[:,2] = poly.pts[:,2] + u[2]
-      # Shift the points
-  return Polygon( pts = pts )
+  return Polygon( pts = poly.pts + ones(size(poly.pts)[1]) * u' )
 end
 
 function (+)( u::Vector, poly::Polygon )
@@ -30,7 +25,9 @@ end
     setSum( poly1::Polygon, poly2::Polygon, dirs, outer=true )
 Addition functionality.  Provides either an inner or out approximation
 """
-function setSum( poly1::Polygon, poly2::Polygon, dirs, outer=true )
+# TODO: Improve the inner approximation when the serach direction is exactly
+# a face normal
+function setSum( poly1::Polygon, poly2::Polygon, dirs::Matrix, outer=true )
   dists1 = poly1.pts * dirs'
   dists2 = poly2.pts * dirs'
       # The distances in each direction
@@ -40,8 +37,7 @@ function setSum( poly1::Polygon, poly2::Polygon, dirs, outer=true )
   maxdists = vec( maxdists1 + maxdists2 )
 
   if( outer )
-    out1 = Polygon( dirs=dirs, dists=maxdists )
-    return Polygon( deeDoop( out1.pts ) )
+    return Polygon( dirs=dirs, dists=maxdists )
   end
 
   Z1 = zeros( dirs )
@@ -52,7 +48,7 @@ function setSum( poly1::Polygon, poly2::Polygon, dirs, outer=true )
       Z1[i,:] = poly1.pts[ dists1[:,i] .== maxdists1[i], : ][1,:]
       Z2[i,:] = poly2.pts[ dists2[:,i] .== maxdists2[i], : ][1,:]
   end
-  return Polygon( pts = deeDoop( Z1 + Z2 ) )
+  return Polygon( pts = Z1 + Z2 )
 end
 
 """
@@ -65,15 +61,24 @@ function setSum( polys::Array{Polygon,1}, dirs::Matrix, outer=true )
       # Number of Polygons to add
   dists = zeros( size(dirs)[1] )
       # Initate the distances
+  innerpts = zeros(dirs)
+      # Initialize the points for the inner approximation
   for( i in 1:N )
+    thisdists = polys[i].pts * dirs'
+    maxdists = maximum( thisdists, 1 )'
     dists += maximum( polys[i].pts * dirs', 1 )'
         # Sum the distances
+    if( !outer )
+      for( j in 1:size(dirs)[1])
+        innerpts[j,:] += polys[i].pt[ thisdists[:,j] .== maxdists[j], : ][1,:]
+      end
+    end
   end
 
   if( outer )
     return Polygon( dirs=dirs, dists=vec( dists ) )
   end
-  return Polygon( pts=dirsToPts( dirs, vec( dists ) ) )
+  return Polygon( pts=innerpts )
 end
 
 """
@@ -81,7 +86,7 @@ end
 Scalar multiplication
 """
 function (*)( k::Number, poly::Polygon )
-  return Polygon( k * poly.pts, poly.dirs, k * poly.dists )
+  return Polygon( pts = k * poly.pts )
 end
 
 """

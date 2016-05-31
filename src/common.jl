@@ -17,7 +17,7 @@ type Polygon
 end
 
 """
-    acwOrder!( ptsDirs::Matrix, dists::Vector=[NaN] )
+    acwOrder( ptsDirs::Matrix, dists::Vector=[NaN] )
 Orients either a set of points, or a a directions/distance pair anit-clockwise.
 """
 function acwOrder( ptsDirs::Matrix, dists::Vector=[NaN] )
@@ -42,20 +42,49 @@ function acwOrder( ptsDirs::Matrix, dists::Vector=[NaN] )
     end
 end
 
+"""
+    deeDoop( pts::Matrix )
+De-duplicates a collection of points.  Must already be ordered anti-clockwise.
+"""
+function deeDoop( pts::Matrix, tol=1e-10 )
+  N = size(pts)[1]
+      # Number of points
+  neighbors = [ pts[ 2:end,: ]; pts[1,:] ]
+      # The neighboring points
+  diff = [ norm( pts[i,:] - neighbors[i,:] ) for i in 1:N ]
+      # The vector of norms
+  return pts[ diff .> tol, : ]
+end
+
+function deeDoop( dirs::Matrix, dists::Vector, tol=1e-10 )
+  N = size(dirs)[1]
+      # Number of points
+  neighbors = [ dirs[ 2:end,: ]; dirs[1,:] ]
+      # The neighboring distance vectors
+  diff = [ norm( dirs[i,:] - neighbors[i,:] ) for i in 1:N ]
+      # The vector of norms
+  return dirs[ diff .> tol, : ], dists[ diff .> tol ]
+end
+
+function deeDoop( poly::Polygon, tol=1e-10 )
+  return deeDoop( poly.pts )
+end
+
 
 """
     polygon( ; pts=[ NaN NaN ], dirs=[ NaN NaN ], dists=[NaN]  )
-Constructor for poylgon.  Maitained assumptions are that dirs is ordered
-clockwise and that pts is already a convex hull.
+Constructor for poylgon.  Removes duplicates and orders anti-clockwise.
+When setting points via pts, must already be a convex hull.
 """
 function Polygon( ; pts=[ NaN NaN ], dirs=[ NaN NaN ], dists=[NaN]  )
 
     if( !isnan( pts[1] ) && isnan( dirs[1] ) )
-        pts = acwOrder( pts )
+        pts = deeDoop( acwOrder( pts ) )
         pts = [ pts[ end, : ]; pts[ 1:(end-1), : ] ]
         dirs, dists = ptsToDirs( pts )
     elseif( !isnan( dirs[1] ) && isnan( pts[1] ) )
         dirs, dists = acwOrder( dirs, dists )
+        dirs, dists = deeDoop( dirs, dists )
         pts = dirsToPts( dirs, dists )
     end
     return Polygon( pts, dirs, dists )

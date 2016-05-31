@@ -6,24 +6,6 @@ Defines utilities for Polygon objects
 =#
 
 """
-    deeDoop( pts::Matrix )
-De-duplicates a collection of points.  Must already be ordered anti-clockwise.
-"""
-function deeDoop( pts::Matrix, tol=1e-10 )
-  N = size(pts)[1]
-      # Number of points
-  neighbors = [ pts[ 2:end,: ]; pts[1,:] ]
-      # The neighboring points
-  diff = [ norm( pts[i,:] - neighbors[i,:] ) for i in 1:N ]
-      # The vector of norms
-  return pts[ diff .> tol, : ]
-end
-
-function deeDoop( poly::Polygon, tol=1e-10 )
-  return deeDoop( poly.pts )
-end
-
-"""
     crop( poly::Polygon, dim::Int, dist, upper=true )
 Returns a Polygon cropped in either the x or y dimension, with upper = true
 retaining the part of the Polygon above the chop, and if false the part below.
