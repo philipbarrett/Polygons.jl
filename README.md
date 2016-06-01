@@ -1,6 +1,6 @@
 # Polygons
 
-Package to define and manipulate poylgons, particularly when computing value sets for game-theoretic problems.  Please see tutorial.ipynb (above) for an extended example of how to use the package.
+Package to define and manipulate polygons, particularly when computing value sets for game-theoretic problems.  Please see the [tutorial][http://nbviewer.jupyter.org/github/squipbar/Polygons.jl/blob/master/Tutorial.ipynb] (also available in this repo as Tutorial.ipynb) for an extended example of how to use the package.
 
 ## Set up
 Currently the package is not available through the Julia package distribution system. To download and use the package, run the following from the command line:
