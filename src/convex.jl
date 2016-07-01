@@ -70,3 +70,27 @@ end
 function grahamScan( poly::Polygon )
     return grahamScan( poly.pts )
 end
+
+"""
+    convexhull( poly::Polygon )
+Computes a convex hull using the Graham Scan algortithm from the CHull2D package
+"""
+function convexhull( poly::Polygon )
+  N = size(poly.pts)[1]
+      # Number of points
+  oldpts = Point{2, Float64}[Point(poly.pts[i, 1], poly.pts[i, 2])
+                            for i=1:N]
+      # Convert poly.pts to an array of points
+  ch = CHull2D.convexhull(oldpts)
+      # The convex hull object
+  N_newpts = length(ch.extremepoints)
+  newpts = Array(Float64, N_newpts, 2)
+      # Create the container for the new points
+  for i=1:N_newpts
+      curr_pt = ch.extremepoints[i]
+      newpts[i, 1] = curr_pt[1]
+      newpts[i, 2] = curr_pt[2]
+  end
+
+  return Polygon( pts = newpts )
+end

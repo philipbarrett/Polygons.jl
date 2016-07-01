@@ -2,7 +2,7 @@
 Philip Barrett, pobarrett@gmail.com
 30may2016, Chicago
 
-Tests the polygon defitions
+Tests the polygon definitions
 =#
 
 Z = [ 1 -1; 1 1; -1 1; -1 -1 ]

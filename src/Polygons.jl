@@ -2,6 +2,8 @@ module Polygons
 
 using Gadfly
 using Colors
+using FixedSizeArrays
+using CHull2D
 import Base: *, +, union
 
 export

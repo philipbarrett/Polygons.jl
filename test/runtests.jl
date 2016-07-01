@@ -3,5 +3,7 @@ using Base.Test
 
 tests = ["definitions", "addition" ]
 for t in tests
-    include("$(t).jl")
+  test_file = "$(t).jl"
+  print_with_color(:green, "* $test_file\n")
+  include(test_file)
 end
