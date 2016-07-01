@@ -75,7 +75,7 @@ end
     convexhull( poly::Polygon )
 Computes a convex hull using the Graham Scan algortithm from the CHull2D package
 """
-function convexhull( poly::Polygon )
+function chull( poly::Polygon )
   N = size(poly.pts)[1]
       # Number of points
   oldpts = Point{2, Float64}[Point(poly.pts[i, 1], poly.pts[i, 2])

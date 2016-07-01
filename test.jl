@@ -23,7 +23,7 @@ x, x_pts = gen_random_points(N, 5);
 # Compute convex hull from Polygons
 @time out = Polygons.grahamScan(x)
 p_x = Polygon( pts = x )
-@time out2 = Polygons.convexhull(p_x)
+@time out2 = Polygons.chull(p_x)
 
 npts_polygons = size(out.pts, 1)
 ep_polygons = out.pts
@@ -59,12 +59,12 @@ t2 = scatter(;x=ep_chull2d[:, 1], y=ep_chull2d[:, 2], mode="lines+markers")
 plot([t1, t2])
 
 bPolygons = @benchmark Polygons.grahamScan(x)
-bHybrid = @benchmark Polygons.grahamScan(p_x)
+bHybrid = @benchmark Polygons.chull(p_x)
 bCHull2D = @benchmark CHull2D.convexhull(x_pts)
 
 println("\n\nBenchmarking with Polygons")
 println(bPolygons)
 println("\n\nBenchmarking with Hybrid conversion")
-println(bPolygons)
+println(bHybrid)
 println("\n\nBenchmarking with CHull2D")
 println(bCHull2D)
