@@ -13,7 +13,8 @@ Returns the convex union of two polygons
 function union( poly1::Polygon, poly2::Polygon )
     pts = [ poly1.pts ; poly2.pts ]
         # The matrix of points to work with
-    return grahamScan( pts )
+    # return grahamScan( pts )
+    return chull( Polygon( pts = pts ) )
 end
 
 """
@@ -23,7 +24,8 @@ Returns the convex union of an array of polygons
 function union( polys::Array{ Polygon, 1 } )
     pts = vcat( [ polys[i].pts for i in 1:length(polys) ] ... )
         # The matrix of all points
-    return grahamScan( pts )
+    # return grahamScan( pts )
+    return chull( Polygon( pts = pts ) )
 end
 
 
