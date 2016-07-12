@@ -4,21 +4,23 @@ using Gadfly
 using Colors
 using FixedSizeArrays
 using CHull2D
-import Base: *, +, union
+import Base: *, .*, +, union
 
 export
     # Types
     Polygon,
 
     # Methods
-    acwOrder!,
+    acwOrder,
     ptsToDirs,
     dirsToPts,
     (*),
+    (.*),
     (+),
     setSum,
     weightedSum,
     grahamScan,
+    chull,
     crop,
     polyPlot,
     deeDoop

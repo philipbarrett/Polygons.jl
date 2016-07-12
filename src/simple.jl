@@ -89,6 +89,13 @@ function (*)( k::Number, poly::Polygon )
   return Polygon( pts = k * poly.pts )
 end
 
+
+function (.*)( v::Vector, poly::Polygon )
+# println( "ones(size(poly.pts)[1]):\n", ones(size(poly.pts)[1]) )
+# println( "v':\n", v' )
+  return Polygon( pts = ( poly.pts .* ( ones(size(poly.pts)[1]) * v' ) ) )
+end
+
 """
     weightedSum( polys::Array{Polygon,1}, wts::Vector dirs, outer=true )
 Computes a weighted setSum of Polygons
@@ -96,10 +103,7 @@ Computes a weighted setSum of Polygons
 function weightedSum( polys::Array{Polygon,1}, wts::Vector, dirs::Matrix, outer=true )
   N = length( polys )
       # Number of Polygons
-  polys2 = similar(polys)
-      # Initiate scaled Polygons with input array
-  for( i in 1:N )
-    polys2[i] = wts[i] * polys[i]
-  end
+  polys2 = [ (wts[i] * polys[i])::Polygon for i in 1:N ]
+      # Scale polygons according to weights
   return( setSum( polys2, dirs, outer ) )
 end

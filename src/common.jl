@@ -81,19 +81,21 @@ end
 """
     polygon( ; pts=[ NaN NaN ], dirs=[ NaN NaN ], dists=[NaN]  )
 Constructor for poylgon.  Removes duplicates and orders anti-clockwise.
-When setting points via pts, must already be a convex hull.
 """
 function Polygon( ; pts=[ NaN NaN ], dirs=[ NaN NaN ], dists=[NaN]  )
 
     if( !isnan( pts[1] ) && isnan( dirs[1] ) )
-        pts = deeDoop( acwOrder( pts ) )
+        pts = deeDoop( acwOrder( chull( pts ) ) )
         pts = [ pts[ end, : ]; pts[ 1:(end-1), : ] ]
         dirs, dists = ptsToDirs( pts )
     elseif( !isnan( dirs[1] ) && isnan( pts[1] ) )
-        dirs, dists = acwOrder( dirs, dists )
-        dirs, dists = deeDoop( dirs, dists )
-        pts = dirsToPts( dirs, dists )
+        dirs, dists = acwOrder( dirs, dists )  
     end
+    dirs, dists = deeDoop( dirs, dists )
+        # The ultimate test of dee-dooping is on the directions.
+        # This is because we can have many points satisfying the same
+        # directional constraint (i.e. on a straight line)
+    pts = dirsToPts( dirs, dists )
     return Polygon( pts, dirs, dists )
 end
 
