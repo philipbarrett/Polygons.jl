@@ -23,7 +23,8 @@ export
     chull,
     crop,
     polyPlot,
-    deeDoop
+    deeDoop,
+    hausdorff
 
 # TODO: Hausdorff distance
 
