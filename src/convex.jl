@@ -85,7 +85,7 @@ function chull( pts::Matrix )
   oldpts = Point{2, Float64}[Point(pts[i, 1], pts[i, 2])
                             for i=1:N]
       # Convert poly.pts to an array of points
-  ch = CHull2D.convexhull(oldpts)
+  ch = CHull2D.convexhull(oldpts, _at=false)
       # The convex hull object
   N_newpts = length(ch.extremepoints)
   newpts = Array(Float64, N_newpts, 2)

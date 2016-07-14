@@ -35,7 +35,7 @@ Returns a Polygon cropped in either the x or y dimension, with upper = true
 retaining the part of the Polygon above the chop, and if false the part below.
 The Polygon should already be oreinted counterclockwise
 """
-function crop( poly::Polygon, dim::Int, dist, upper=true )
+function crop( poly::Polygon, dim::Int, dist::Float64, upper::Bool=true )
   N = size(poly.pts)[1]
 
   # The crop doesn't bind

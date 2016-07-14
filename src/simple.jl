@@ -13,11 +13,11 @@ Defines basic Polygon operations:
     add( poly::Polygon, pt::Vector )
 Adds a vector to all points in a Polygon
 """
-function (+)( poly::Polygon, u::Vector )
+function (+)( poly::Polygon, u::Vector{Float64} )
   return Polygon( pts = poly.pts + ones(size(poly.pts)[1]) * u' )
 end
 
-function (+)( u::Vector, poly::Polygon )
+function (+)( u::Vector{Float64}, poly::Polygon )
   return poly + u
 end
 
@@ -27,7 +27,8 @@ Addition functionality.  Provides either an inner or out approximation
 """
 # TODO: Improve the inner approximation when the serach direction is exactly
 # a face normal
-function setSum( poly1::Polygon, poly2::Polygon, dirs::Matrix, outer=true )
+function setSum( poly1::Polygon, poly2::Polygon,
+                    dirs::Matrix{Float64}, outer::Bool=true )
   dists1 = poly1.pts * dirs'
   dists2 = poly2.pts * dirs'
       # The distances in each direction
@@ -55,7 +56,8 @@ end
     setSum( poly1::Array{Polygon,1}, poly2::Array{Polygon,1}, dirs, outer=true )
 Adds an array of Polygons
 """
-function setSum( polys::Array{Polygon,1}, dirs::Matrix, outer=true )
+function setSum( polys::Array{Polygon,1}, dirs::Matrix{Float64},
+                    outer::Bool=true )
 
   N = length(polys)
       # Number of Polygons to add
@@ -85,12 +87,12 @@ end
     times( poly1::Array{Polygon,1}, poly2::Array{Polygon,1}, dirs, outer=true )
 Scalar multiplication
 """
-function (*)( k::Number, poly::Polygon )
+function (*)( k::Float64, poly::Polygon )
   return Polygon( pts = k * poly.pts )
 end
 
 
-function (.*)( v::Vector, poly::Polygon )
+function (.*)( v::Vector{Float64}, poly::Polygon )
 # println( "ones(size(poly.pts)[1]):\n", ones(size(poly.pts)[1]) )
 # println( "v':\n", v' )
   return Polygon( pts = ( poly.pts .* ( ones(size(poly.pts)[1]) * v' ) ) )
@@ -100,7 +102,8 @@ end
     weightedSum( polys::Array{Polygon,1}, wts::Vector dirs, outer=true )
 Computes a weighted setSum of Polygons
 """
-function weightedSum( polys::Array{Polygon,1}, wts::Vector, dirs::Matrix, outer=true )
+function weightedSum( polys::Array{Polygon,1}, wts::Vector{Float64},
+                        dirs::Matrix{Float64}, outer::Bool=true )
   N = length( polys )
       # Number of Polygons
   polys2 = [ (wts[i] * polys[i])::Polygon for i in 1:N ]
