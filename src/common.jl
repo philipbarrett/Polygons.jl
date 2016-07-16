@@ -61,11 +61,13 @@ function deeDoop( pts::Matrix{Float64}, tol::Float64=1e-10 )
   return pts[ diff .> tol, : ]
 end
 
-function deeDoop( dirs::Matrix{Float64}, dists::Vector{Float64}, tol=1e-10 )
+function deeDoop( dirs::Matrix{Float64}, dists::Vector{Float64},
+                      tol=1e-8 )
   N = size(dirs)[1]
       # Number of points
   neighbors = [ dirs[ 2:N,: ]; dirs[1,:] ]
       # The neighboring distance vectors
+  keep1 = or( hcat( abs( dirs[:,1] - neighbors[:,1] ) .> tol
   diff = [ norm( dirs[i,:] - neighbors[i,:] ) for i in 1:N ]
       # The vector of norms
   return dirs[ diff .> tol, : ], dists[ diff .> tol ]
