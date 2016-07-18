@@ -11,29 +11,29 @@ export
     Polygon,
 
     # Methods
-    acwOrder,
-    ptsToDirs,
-    dirsToPts,
-    (*),
-    (.*),
-    (+),
-    setSum,
-    weightedSum,
-    grahamScan,
-    chull,
-    crop,
-    polyPlot,
-    deeDoop,
-    hausdorff
+    acwOrder #,
+    # ptsToDirs,
+    # dirsToPts,
+    # (*),
+    # (.*),
+    # (+),
+    # setSum,
+    # weightedSum,
+    # grahamScan,
+    # chull,
+    # crop,
+    # polyPlot,
+    # deeDoop,
+    # hausdorff
 
 # TODO: Hausdorff distance
 
 ## Source files
 include("common.jl")
-include("simple.jl")
-include("convex.jl")
-include("utils.jl")
-include("hausdorff.jl")
-include("polyPlot.jl")
+# include("simple.jl")
+# include("convex.jl")
+# include("utils.jl")
+# include("hausdorff.jl")
+# include("polyPlot.jl")
 
 end # module
