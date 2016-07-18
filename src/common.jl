@@ -52,31 +52,53 @@ function acwOrder( ptsDirs::Mat, dists::Vec=Vec{1, Float64}(NaN) )
     end
 end
 
-# """
-#     deeDoop( pts::Matrix )
-# De-duplicates a collection of points.  Must already be ordered anti-clockwise.
-# """
-# function deeDoop( pts::Matrix{Float64}, tol::Float64=1e-10 )
-#   N = size(pts)[1]
-#       # Number of points
-#   neighbors = [ pts[ 2:N,: ]; pts[1,:] ]
-#       # The neighboring points
-#   diff = [ norm( pts[i,:] - neighbors[i,:] ) for i in 1:N ]
-#       # The vector of norms
-#   return pts[ diff .> tol, : ]
-# end
-#
-# function deeDoop( dirs::Matrix{Float64}, dists::Vector{Float64},
-#                       tol=1e-8 )
-#   N = size(dirs)[1]
-#       # Number of points
-#   neighbors = [ dirs[ 2:N,: ]; dirs[1,:] ]
-#       # The neighboring distance vectors
-#   diff = [ norm( dirs[i,:] - neighbors[i,:] ) for i in 1:N ]
-#       # The vector of norms
-#   return dirs[ diff .> tol, : ], dists[ diff .> tol ]
-# end
-#
+"""
+    deeDoop( pts::Matrix )
+De-duplicates a collection of points.  Must already be ordered anti-clockwise.
+"""
+function deeDoop( pts::Mat, tol::Float64=1e-10 )
+  N = size(pts)[1]
+      # Number of points
+  neighbors = [ [ pts[ i, j ]::Float64 for i in 2:N, j in 1:2 ];
+                [ pts[1,1] pts[1,2] ] ]
+      # The neighboring points
+  diffce = pts - neighbors
+      # Difference between the two
+  distce = [ norm( [ diffce[i,1], diffce[i,2] ] ) for i in 1:N ]
+      # The vector of norms
+  idx = distce .> tol
+      # Location
+  M = sum( idx )
+      # Number of points to return
+  idx_loc = find(idx)
+      # The indices of the return points
+  out = Mat{M,2,Float64}( [ pts[idx_loc[i],j] for i in 1:M, j in 1:2 ] )
+      # Output
+  return out
+end
+
+function deeDoop( dirs::Mat, dists::Vec, tol=1e-8 )
+  N = size(dirs)[1]
+      # Number of points
+  neighbors = [ [ dirs[ i, j ]::Float64 for i in 2:N, j in 1:2 ];
+                [ dirs[1,1] dirs[1,2] ] ]
+      # The neighboring points
+  diffce = dirs - neighbors
+      # Difference between the two
+  distce = [ norm( [ diffce[i,1], diffce[i,2] ] ) for i in 1:N ]
+      # The vector of norms
+  idx = distce .> tol
+      # Location
+  M = sum( idx )
+      # Number of points to return
+  idx_loc = find(idx)
+      # The indices of the return points
+  outdirs = Mat{M,2,Float64}( [ dirs[idx_loc[i],j] for i in 1:M, j in 1:2 ] )
+  outdists = Vec{M,Float64}( [ dists[idx_loc[i]] for i in 1:M ] )
+      # Output
+  return outdirs, outdists
+end
+
 # function deeDoop( poly::Polygon, tol=1e-10 )
 #   dirs, dists = deeDoop( poly.dirs, poly.dists )
 #   return Polygon( dirs=dirs, dists=dists )
@@ -105,51 +127,65 @@ end
 #     pts = dirsToPts( dirs, dists )
 #     return Polygon( pts, dirs, dists )
 # end
-#
-# """
-#     dirsToPts( dirs::Matrix, dists::Vector )
-# Given a normal/distance description of a set, returns a set of points mZ which
-# lie at the vertices.  This assumes that the vector of normals is ordered
-# counter-clockwise already.
-# """
-# function dirsToPts( dirs::Matrix{Float64}, dists::Vector{Float64} )
-#   nPts = length(dists)
-#       # Number of points to be computed
-#   pts = zeros(Float64, 2, nPts)
-#       # Initialize the (transpose) output vector
-#   counter = 1
-#       # Counter: needed in cases where multiple boundary lines intersect at only
-#       # one point
-#
-#   # Create the extended matrices (put the first case at the end)
-#   dirsExt = [ dirs ; dirs[1,:] ]
-#   distsExt = [ dists; dists[1,:] ]
-#
-#   # Main loop: Over all points
-#   for i in 1:nPts
-#     A = dirsExt[i:(i+1),:]
-#         # The directional vectors to be intersected
-#     b = distsExt[i:(i+1)]
-#         # And their distances
-#     sol = A \ b
-#         # The candidate solution
-#
-#     # Now compute the error: Detects multiple intersections
-#     err = norm( A * sol - b )
-#         # Inversion error
-#     relerr = ( norm(b) == 0 ) ? err : err / norm(b)
-#         # Relative error (where possible)
-#
-#     # If there is no error, then assign to the output
-#     if( relerr < 1e-14 )
-#       pts[:,counter] = sol
-#       counter += 1
-#     end
-#   end
-#   out = transpose(pts)
-#   return( [ out[ nPts, : ] ; out[ 1:(nPts-1), : ] ] )
-# end
-#
+
+"""
+    dirsToPts( dirs::Matrix, dists::Vector )
+Given a normal/distance description of a set, returns a set of points mZ which
+lie at the vertices.  This assumes that the vector of normals is ordered
+counter-clockwise already.
+"""
+function dirsToPts( dirs::Mat, dists::Vec )
+  N = length(dists)
+      # Number of points to be computed
+  pts = Mat{N,2,Float64}(0)
+      # Initialize the output vector
+  counter = 0::Int
+      # Counter: needed in cases where multiple boundary lines intersect at only
+      # one point
+
+  # Create the extended matrices (put the first case at the end)
+  dirsExt = Mat{N+1,2,Float64}( [ [ dirs[i,j] for i in 1:N, j in 1:2 ];
+                                  [dirs[1,1] dirs[1,2] ] ] )
+  distsExt = Vec{N+1, Float64}( [ [ dists[i] for i in 1:N ] ; dists[1] ] )
+
+  # Main loop: Over all points
+  for i in 1:N
+    A = Mat{2,2,Float64}( [ dirsExt[i+k,j] for k in 0:1, j in 1:2 ] )
+        # The directional vectors to be intersected
+    b = Vec{2,Float64}( [ distsExt[i], distsExt[i+1] ] )
+        # And their distances
+    sol = inv(A) * b
+        # The candidate solution
+
+println( "sol = ", sol )
+
+    # Now compute the error: Detects multiple intersections
+    err = norm( A * sol - b )
+        # Inversion error
+    relerr = ( norm(b) == 0 ) ? err : err / norm(b)
+        # Relative error (where possible)
+
+    # If there is no error, then assign to the output
+    if( relerr < 1e-14 )
+      counter += 1::Int
+
+### NEED TO KEEP DEBUGGING FOR HERE ###
+println( "counter = ", counter )
+println( "pts[1,1] = ", pts[1,1] )
+println( "sol[1] = ", sol[1] )
+println( "pts[counter,1] = ", pts[counter,1] )
+
+      pts[counter,1] = sol[1]
+      pts[counter,2] = sol[2]
+    end
+  end
+  out = Mat{counter, 2}([ [ pts[counter,1], pts[counter,2] ] ;
+                          [ pts[i,j] for i in 1:(counter-1), j in 1:2 ] ] )
+      # Formulate the output
+  return out
+  return nothing
+end
+
 # """
 #     ptsToDirs( pts::Matrix )
 # Given a set of points, returns the normal-distance representation of the edges

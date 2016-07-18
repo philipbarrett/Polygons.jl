@@ -11,9 +11,9 @@ export
     Polygon,
 
     # Methods
-    acwOrder #,
+    acwOrder,
     # ptsToDirs,
-    # dirsToPts,
+    dirsToPts,
     # (*),
     # (.*),
     # (+),
@@ -23,10 +23,8 @@ export
     # chull,
     # crop,
     # polyPlot,
-    # deeDoop,
+    deeDoop #,
     # hausdorff
-
-# TODO: Hausdorff distance
 
 ## Source files
 include("common.jl")
