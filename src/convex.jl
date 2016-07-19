@@ -97,3 +97,18 @@ function chull( pts::Matrix )
   end
   return newpts
 end
+
+function chull( pts::Mat )
+  N = size(pts)[1]
+      # Number of points
+  oldpts = Point{2, Float64}[Point(pts[i, 1], pts[i, 2])
+                            for i=1:N]
+      # Convert pts to an array of points
+  ch = CHull2D.convexhull(oldpts, _at=false)
+      # The convex hull object
+  N_newpts = length(ch.extremepoints)
+  newpts = Mat{N_newpts,2,Float64}(
+                [ch.extremepoints[i][j] for i in 1:N_newpts, j in 1:2 ] )
+      # Use iterator to convert to
+  return newpts
+end

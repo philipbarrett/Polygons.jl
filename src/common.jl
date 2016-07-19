@@ -59,8 +59,9 @@ De-duplicates a collection of points.  Must already be ordered anti-clockwise.
 function deeDoop( pts::Mat, tol::Float64=1e-10 )
   N = size(pts)[1]
       # Number of points
-  neighbors = [ [ pts[ i, j ]::Float64 for i in 2:N, j in 1:2 ];
-                [ pts[1,1] pts[1,2] ] ]
+  neighbors = Mat{N,2,Float64}(
+                [ [ pts[ i, j ]::Float64 for i in 2:N, j in 1:2 ];
+                [ pts[1,1] pts[1,2] ] ] )
       # The neighboring points
   diffce = pts - neighbors
       # Difference between the two
@@ -105,28 +106,32 @@ end
 # end
 #
 #
-# """
-#     polygon( ; pts=[ NaN NaN ], dirs=[ NaN NaN ], dists=[NaN]  )
-# Constructor for poylgon.  Removes duplicates and orders anti-clockwise.
-# """
-# function Polygon( ; pts::Matrix{Float64}=[ NaN NaN ],
-#                     dirs::Matrix{Float64}=[ NaN NaN ],
-#                     dists::Vector{Float64}=[NaN]  )
-#
-#     if( !isnan( pts[1] ) && isnan( dirs[1] ) )
-#         pts = deeDoop( acwOrder( chull( pts ) ) )
-#         pts = [ pts[ end, : ]; pts[ 1:(end-1), : ] ]
-#         dirs, dists = ptsToDirs( pts )
-#     elseif( !isnan( dirs[1] ) && isnan( pts[1] ) )
-#         dirs, dists = acwOrder( dirs, dists )
-#     end
-#     dirs, dists = deeDoop( dirs, dists )
-#         # The ultimate test of dee-dooping is on the directions.
-#         # This is because we can have many points satisfying the same
-#         # directional constraint (i.e. on a straight line)
-#     pts = dirsToPts( dirs, dists )
-#     return Polygon( pts, dirs, dists )
-# end
+"""
+    polygon( ; pts=[ NaN NaN ], dirs=[ NaN NaN ], dists=[NaN]  )
+Constructor for poylgon.  Removes duplicates and orders anti-clockwise.
+"""
+function Polygon( ; pts::Mat=Mat{1,2,Float64}(NaN),
+                    dirs::Mat=Mat{1,2,Float64}(NaN),
+                    dists::Vec=Vec{1,Float64}(NaN) )
+
+    if( !isnan( pts[1] ) && isnan( dirs[1] ) )
+        pts_clean = deeDoop( acwOrder( chull( pts ) ) )
+        N = size(pts_clean)[1]
+        pts_clean2 = Mat{N,2,Float64}(
+            [ [ pts_clean[N,1] pts_clean[N,2] ] ;
+              [ pts_clean[i,j] for i in 1:(N-1), j in 1:2 ] ] )
+        dirs_ord, dists_ord = ptsToDirs( pts_clean2 )
+    elseif( !isnan( dirs[1] ) && isnan( pts[1] ) )
+        dirs_ord, dists_ord = acwOrder( dirs, dists )
+    end
+    dirs_final, dists_final = deeDoop( dirs_ord, dists_ord )
+        # The ultimate test of dee-dooping is on the directions.
+        # This is because we can have many points satisfying the same
+        # directional constraint (i.e. on a straight line)
+    N_final = size(dirs_final)[1]
+    pts_final = dirsToPts( dirs_final, dists_final )
+    return Polygon{N_final}( pts_final, dirs_final, dists_final )
+end
 
 """
     dirsToPts( dirs::Matrix, dists::Vector )
@@ -137,9 +142,9 @@ counter-clockwise already.
 function dirsToPts( dirs::Mat, dists::Vec )
   N = length(dists)
       # Number of points to be computed
-  pts = Mat{N,2,Float64}(0)
+  pts = zeros(N,2)
       # Initialize the output vector
-  counter = 0::Int
+  counter = 0
       # Counter: needed in cases where multiple boundary lines intersect at only
       # one point
 
@@ -157,8 +162,6 @@ function dirsToPts( dirs::Mat, dists::Vec )
     sol = inv(A) * b
         # The candidate solution
 
-println( "sol = ", sol )
-
     # Now compute the error: Detects multiple intersections
     err = norm( A * sol - b )
         # Inversion error
@@ -167,42 +170,38 @@ println( "sol = ", sol )
 
     # If there is no error, then assign to the output
     if( relerr < 1e-14 )
-      counter += 1::Int
-
-### NEED TO KEEP DEBUGGING FOR HERE ###
-println( "counter = ", counter )
-println( "pts[1,1] = ", pts[1,1] )
-println( "sol[1] = ", sol[1] )
-println( "pts[counter,1] = ", pts[counter,1] )
-
+      counter += 1
       pts[counter,1] = sol[1]
       pts[counter,2] = sol[2]
     end
   end
-  out = Mat{counter, 2}([ [ pts[counter,1], pts[counter,2] ] ;
-                          [ pts[i,j] for i in 1:(counter-1), j in 1:2 ] ] )
+
+  out = Mat{counter, 2, Float64}([ pts[counter,:] ; pts[1:(counter-1),:] ] )
       # Formulate the output
   return out
-  return nothing
 end
 
-# """
-#     ptsToDirs( pts::Matrix )
-# Given a set of points, returns the normal-distance representation of the edges
-# Assumes that the points are ordered anti-clockwise already.
-# """
-# function ptsToDirs( pts::Matrix{Float64} )
-#   nPts = size(pts)[1]
-#       # Number of points
-#   flip = [ 0.0 1.0; -1.0 0.0 ]
-#       # Matrix to convert grdient to normal
-#   neighbors = [ pts[ 2:nPts, : ] ; pts[1,:] ]
-#       # The neighboring points
-#   unscaled = ( pts - neighbors ) * flip
-#       # The unscaled vaules
-#   dirs = ( unscaled ./ sqrt( sum( unscaled .* unscaled, 2 ) ) )::Matrix{Float64}
-#       # The directions
-#   dists = (vec(sum( pts .* dirs, 2)))::Vector{Float64}
-#       # The distances in each direction
-#   return dirs, dists
-# end
+"""
+    ptsToDirs( pts::Matrix )
+Given a set of points, returns the normal-distance representation of the edges
+Assumes that the points are ordered anti-clockwise already.
+"""
+function ptsToDirs( pts::Mat )
+  N = size(pts)[1]
+      # Number of points
+  flip = Mat{2,2, Float64}([ 0.0 1.0; -1.0 0.0 ])
+      # Matrix to convert grdient to normal
+  neighbors = Mat{N,2,Float64}(
+                [ [ pts[ i, j ]::Float64 for i in 2:N, j in 1:2 ];
+                [ pts[1,1] pts[1,2] ] ] )
+      # The neighboring points
+  unscaled = ( pts - neighbors ) * flip
+      # The unscaled vaules
+  lens = [ norm( [unscaled[i,1], unscaled[i,2] ] ) for i in 1:N ]
+      # Lengths of the unscaled directions
+  dirs = Mat{N,2,Float64}( [ unscaled[i,j] / lens[i] for i in 1:N, j in 1:2] )
+      # The directions
+  dists = (dirs .* pts) * Vec{2,Float64}(1)
+      # The distances in each direction
+  return dirs, dists
+end
