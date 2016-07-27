@@ -58,6 +58,10 @@ function deeDoop( pts::Matrix{Float64}, tol::Float64=1e-10 )
       # The neighboring points
   diff = [ norm( pts[i,:] - neighbors[i,:] ) for i in 1:N ]
       # The vector of norms
+  if all( diff .<= tol )
+    return pts[ 1:3, :]
+        # The single-point case
+  end
   return pts[ diff .> tol, : ]
 end
 
@@ -89,10 +93,12 @@ function Polygon( ; pts::Matrix{Float64}=[ NaN NaN ],
     if( !isnan( pts[1] ) && isnan( dirs[1] ) )
         pts = deeDoop( acwOrder( chull( pts ) ) )
         pts = [ pts[ end, : ]; pts[ 1:(end-1), : ] ]
-        dirs, dists = ptsToDirs( pts )
+
     elseif( !isnan( dirs[1] ) && isnan( pts[1] ) )
         dirs, dists = acwOrder( dirs, dists )
+        pts = deeDoop( chull( dirsToPts( dirs, dists ) ) )
     end
+    dirs, dists = ptsToDirs( pts )
     dirs, dists = deeDoop( dirs, dists )
         # The ultimate test of dee-dooping is on the directions.
         # This is because we can have many points satisfying the same
