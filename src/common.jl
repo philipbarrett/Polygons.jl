@@ -96,14 +96,16 @@ function Polygon( ; pts::Matrix{Float64}=[ NaN NaN ],
 
     elseif( !isnan( dirs[1] ) && isnan( pts[1] ) )
         dirs, dists = acwOrder( dirs, dists )
-        pts = deeDoop( chull( dirsToPts( dirs, dists ) ) )
+        pts = deeDoop( acwOrder( chull( dirsToPts( dirs, dists ) ) ) )
     end
     dirs, dists = ptsToDirs( pts )
-    dirs, dists = deeDoop( dirs, dists )
-        # The ultimate test of dee-dooping is on the directions.
-        # This is because we can have many points satisfying the same
-        # directional constraint (i.e. on a straight line)
-    pts = dirsToPts( dirs, dists )
+    if size(pts)[1] > 3
+      dirs, dists = deeDoop( dirs, dists )
+          # The ultimate test of dee-dooping is on the directions.
+          # This is because we can have many points satisfying the same
+          # directional constraint (i.e. on a straight line)
+      pts = dirsToPts( dirs, dists )
+    end
     return Polygon( pts, dirs, dists )
 end
 
