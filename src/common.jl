@@ -92,18 +92,22 @@ function Polygon( ; pts::Matrix{Float64}=[ NaN NaN ],
 
     if( !isnan( pts[1] ) && isnan( dirs[1] ) )
         pts = deeDoop( acwOrder( chull( pts ) ) )
-        pts = [ pts[ end, : ]; pts[ 1:(end-1), : ] ]
-
+          # If points only
     elseif( !isnan( dirs[1] ) && isnan( pts[1] ) )
         dirs, dists = acwOrder( dirs, dists )
-        pts = deeDoop( acwOrder( chull( dirsToPts( dirs, dists ) ) ) )
+        pts = acwOrder( chull( dirsToPts( dirs, dists ) ) )
+          # If dists/dirs only
     end
+    pts = [ pts[ end, : ]; pts[ 1:(end-1), : ] ]
+        # re-initiate the points
     dirs, dists = ptsToDirs( pts )
     if size(pts)[1] > 3
       dirs, dists = deeDoop( dirs, dists )
           # The ultimate test of dee-dooping is on the directions.
           # This is because we can have many points satisfying the same
           # directional constraint (i.e. on a straight line)
+          # Question: Can I replace this with some test of whether
+          # points are on more than two lines? (Or very close to?)
       pts = dirsToPts( dirs, dists )
     end
     return Polygon( pts, dirs, dists )
@@ -126,7 +130,7 @@ function dirsToPts( dirs::Matrix{Float64}, dists::Vector{Float64} )
 
   # Create the extended matrices (put the first case at the end)
   dirsExt = [ dirs ; dirs[1,:] ]
-  distsExt = [ dists; dists[1,:] ]
+  distsExt = [ dists; dists[1] ]
 
   # Main loop: Over all points
   for i in 1:nPts
@@ -173,3 +177,12 @@ function ptsToDirs( pts::Matrix{Float64} )
       # The distances in each direction
   return dirs, dists
 end
+
+# """
+#     ptsCheck( pts::Matrix, dirs::Matrix, dists::Vector )
+# Checks that a set of points satisfy all the vector restrictions.  If not,
+# returns anly those that do
+# """
+# function ptsCheck( pts::Matrix, dirs::Matrix, dists::Vector )
+#  TODO: This function! :)
+# end

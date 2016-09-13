@@ -1,5 +1,5 @@
 julia 0.4
 Gadfly 0.4
 Colors 0.6.4
-CHull2D
+CHull2d
 FixedSizeArrays
