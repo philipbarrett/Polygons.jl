@@ -81,6 +81,26 @@ function deeDoop( poly::Polygon, tol=1e-10 )
   return Polygon( dirs=dirs, dists=dists )
 end
 
+"""
+    isVert( pts::Matrix{Float64} )
+Returns a vector of booleans that indicates whether a point is
+a vertex
+"""
+function isVert( pts::Matrix{Float64})
+  N = size(pts)[1]
+      # Number of points
+  neighbors = [ pts[ 2:N,: ]; pts[1,:] ]
+      # Neighboring points
+  v = pts - neighbors
+  v = vcat( v[N,:], v )
+      # The vectors along each side
+  cosv = [ sum( v[i,:] .* - v[i+1,:] ) /
+            ( norm(v[i,:])*norm(v[i+1,:]) ) for i in 1:N ]
+      # The cosine of the angle at each point
+  keep = [ !isnan(cosv[i]) && cosv[i] > -1 for i in 1:N ]
+      # The vertices to retain
+  return keep
+end
 
 """
     polygon( ; pts=[ NaN NaN ], dirs=[ NaN NaN ], dists=[NaN]  )
@@ -90,26 +110,36 @@ function Polygon( ; pts::Matrix{Float64}=[ NaN NaN ],
                     dirs::Matrix{Float64}=[ NaN NaN ],
                     dists::Vector{Float64}=[NaN]  )
 
+    # Step 1: Order and convert to points if necessary
     if( !isnan( pts[1] ) && isnan( dirs[1] ) )
-        pts = deeDoop( acwOrder( chull( pts ) ) )
+        pts = acwOrder( pts )
           # If points only
     elseif( !isnan( dirs[1] ) && isnan( pts[1] ) )
         dirs, dists = acwOrder( dirs, dists )
-        pts = acwOrder( chull( dirsToPts( dirs, dists ) ) )
+        pts = dirsToPts( dirs, dists )
           # If dists/dirs only
     end
     pts = [ pts[ end, : ]; pts[ 1:(end-1), : ] ]
         # re-initiate the points
-    dirs, dists = ptsToDirs( pts )
-    if size(pts)[1] > 3
-      dirs, dists = deeDoop( dirs, dists )
-          # The ultimate test of dee-dooping is on the directions.
-          # This is because we can have many points satisfying the same
-          # directional constraint (i.e. on a straight line)
-          # Question: Can I replace this with some test of whether
-          # points are on more than two lines? (Or very close to?)
-      pts = dirsToPts( dirs, dists )
-    end
+
+    # Step 2: Enforce the convex hull
+    pts = chull(pts)
+
+    # Step 3: Remove non-vertex points
+    pts = pts[ isVert(pts), : ]
+        # Remove the non-vertex (and near-duplicate) points
+    dirs, dists = ptsToDirs(pts)
+        # Create dirs and dists
+
+    # if size(pts)[1] > 3
+    #   dirs, dists = deeDoop( dirs, dists )
+    #       # The ultimate test of dee-dooping is on the directions.
+    #       # This is because we can have many points satisfying the same
+    #       # directional constraint (i.e. on a straight line)
+    #       # Question: Can I replace this with some test of whether
+    #       # points are on more than two lines? (Or very close to?)
+    #   pts = dirsToPts( dirs, dists )
+    # end
     return Polygon( pts, dirs, dists )
 end
 

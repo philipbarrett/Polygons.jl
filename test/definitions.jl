@@ -5,6 +5,8 @@ Philip Barrett, pobarrett@gmail.com
 Tests the polygon definitions
 =#
 
+### NEED TO RE-CHECK ALL THESE TESTS
+
 Z = [ 1.0 -1; 1 1; -1 1; -1 -1 ]::Matrix{Float64}
 G = [ 1.0 0; 0 1; -1 0; 0 -1 ]
 m = [ 1.0, 1, 1, 1 ]
@@ -26,7 +28,11 @@ dupeZ = Z[ [1, 1, 2, 3, 4, 1, 2 ], : ]
 f = Polygon(pts=dupeZ)
     # Also good
 
-for( compare in [b c d e f] )
+nearZ = vcat( Z, Z[ [2,2,2,2,2],:] +
+          [0 -1e-11 ; -1e-11 0 ; -1e-11 -1e-11 ; 0 -1e-11 ; -1e-11 0 ] )
+g = Polygon(pts=nearZ)
+
+for( compare in [b c d e f g] )
     @test a.pts == compare.pts
     @test a.dirs == compare.dirs
     @test a.dists == compare.dists
