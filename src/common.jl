@@ -126,6 +126,8 @@ function Polygon( ; pts::Matrix{Float64}=[ NaN NaN ],
     pts = chull(pts)
 
     # Step 3: Remove non-vertex points
+    pts = deeDoop( pts, 0.0 )
+        # Strict de-duplication
     pts = pts[ isVert(pts), : ]
         # Remove the non-vertex (and near-duplicate) points
     dirs, dists = ptsToDirs(pts)

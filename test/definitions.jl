@@ -7,8 +7,8 @@ Tests the polygon definitions
 
 ### NEED TO RE-CHECK ALL THESE TESTS
 
-Z = [ 1.0 -1; 1 1; -1 1; -1 -1 ]::Matrix{Float64}
-G = [ 1.0 0; 0 1; -1 0; 0 -1 ]
+Z = [ -1 -1; 1.0 -1; 1 1; -1 1 ]::Matrix{Float64}
+G = [ 0 -1; 1.0 0; 0 1; -1 0 ]
 m = [ 1.0, 1, 1, 1 ]
 a = Polygon( Z, G, m ) ;
 b = Polygon( pts=Z ) ;
@@ -28,9 +28,10 @@ dupeZ = Z[ [1, 1, 2, 3, 4, 1, 2 ], : ]
 f = Polygon(pts=dupeZ)
     # Also good
 
-nearZ = vcat( Z, Z[ [2,2,2,2,2],:] +
+nearZ = vcat( Z, Z[ [3,3,3,3,3],:] +
           [0 -1e-11 ; -1e-11 0 ; -1e-11 -1e-11 ; 0 -1e-11 ; -1e-11 0 ] )
 g = Polygon(pts=nearZ)
+    # Works nicely
 
 for( compare in [b c d e f g] )
     @test a.pts == compare.pts
